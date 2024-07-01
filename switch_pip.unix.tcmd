@@ -1,1 +1,71 @@
-#!/bin/bash# 检查是否安装了Pythonif ! command -v python &> /dev/null; then    echo "Python is not installed. Please install Python and try me again later."    exit 1fi# 设置远程Python脚本的URLPYTHON_SCRIPT_URL="https://sh.evzs.com/prm/switch_pip.py"# 设置本地临时文件名TEMP_PY_SCRIPT="switch_pip_temp.py"# 下载Python脚本echo "Downloading Package..."curl -o $TEMP_PY_SCRIPT $PYTHON_SCRIPT_URL# 检查是否下载成功if [ ! -f $TEMP_PY_SCRIPT ]; then    echo "Download Failed, Please check your network."    exit 1fi# 运行Python脚本echo "Running Package..."python $TEMP_PY_SCRIPT# 删除临时Python脚本echo "Remove Package..."rm -f $TEMP_PY_SCRIPTecho "Done."# 暂停脚本，等待用户输入# read -p "Press [Enter] key to continue..."
+#!/bin/bash
+
+# 定义PIP源
+declare -A pip_sources
+pip_sources=(
+    ["1"]="清华大学 https://pypi.tuna.tsinghua.edu.cn/simple/"
+    ["2"]="中国科技大学 https://pypi.mirrors.ustc.edu.cn/simple/"
+    ["3"]="华为云 https://repo.huaweicloud.com/artifactory/pypi-public/simple/"
+    ["4"]="腾讯云 https://mirrors.cloud.tencent.com/pypi/simple/"
+    ["5"]="阿里云 https://mirrors.aliyun.com/pypi/simple/"
+    ["6"]="Pip官方源 https://pypi.python.org/simple/"
+)
+
+check_connectivity() {
+    local url=$1
+    local latency
+    latency=$(curl -o /dev/null -s -w '%{time_total}\n' --max-time 2 "$url")
+    if [[ $? -eq 28 ]]; then
+        echo ">2s"
+    elif [[ $? -eq 0 ]]; then
+        local latency_ms=$(echo "$latency" | awk '{printf "%.0f", $1 * 1000}')
+        echo "${latency_ms}ms"
+    else
+        echo "N/A"
+    fi
+}
+
+list_sources() {
+    echo -e "\n{Python Pip Repository Manager}"
+    echo -e "\n目前可用的 Python Pip 源服务：\n"
+    for key in "${!pip_sources[@]}"; do
+        local name_url=(${pip_sources[$key]})
+        local name=${name_url[0]}
+        local url=${name_url[1]}
+        local latency
+        latency=$(check_connectivity "$url")
+        echo "$key. $name: $url (延迟: $latency)"
+    done
+    echo -e "\nq. 退出"
+}
+
+switch_source() {
+    local choice=$1
+    local name_url=(${pip_sources[$choice]})
+    local name=${name_url[0]}
+    local url=${name_url[1]}
+    pip config set global.index-url "$url"
+    echo "已切换 Python Pip源到 $name ($url)"
+}
+
+main() {
+    if [[ -n $PIP_SOURCE_CHOICE && -n ${pip_sources[$PIP_SOURCE_CHOICE]} ]]; then
+        switch_source "$PIP_SOURCE_CHOICE"
+    else
+        list_sources
+        while true; do
+            read -p $'\n请选择一个 Python Pip 源 (输入序号) 或 输入 \'q\' 退出: ' choice < /dev/tty
+            if [[ $choice == 'q' ]]; then
+                echo "程序已退出。"
+                break
+            elif [[ -n ${pip_sources[$choice]} ]]; then
+                switch_source "$choice"
+                break
+            else
+                echo "无效的选择，请输入有效的序号。"
+            fi
+        done
+    fi
+}
+
+main

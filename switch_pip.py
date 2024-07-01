@@ -24,7 +24,6 @@ def check_connectivity(url):
         latency = (time.time() - start_time) * 1000  # 转换为毫秒
         return response.status == 200, latency
     except Exception as e:
-        # print(f"调试信息: 无法连接到 {url}。错误: {e}")
         return False, None
     finally:
         connection.close()
@@ -34,7 +33,6 @@ def list_sources():
     print(f"\n目前可用的 Python Pip 源服务：\n")
     for key, (name, url) in pip_sources.items():
         is_connected, latency = check_connectivity(url)
-        # status = "可连接" if is_connected else "不可连接"
         latency_info = f"{latency:.2f} ms" if latency is not None else "N/A"
         print(f"{key}. {name}: {url} (延迟: {latency_info})")
     print("\nq. 退出")
@@ -48,17 +46,21 @@ def switch_source(choice):
         print(f"无效的选择，请重新输入。")
 
 def main():
-    list_sources()
-    while True:
-        choice = input(f"\n请选择一个 Python Pip 源 (输入序号) 或 输入 'q' 退出: ").strip()
-        if choice == 'q':
-            print("程序已退出。")
-            break
-        elif choice in pip_sources:
-            switch_source(choice)
-            break
-        else:
-            print(f"无效的选择，请输入有效的序号。")
+    pip_source_choice = os.getenv('PIP_SOURCE_CHOICE')
+    if pip_source_choice and pip_source_choice in pip_sources:
+        switch_source(pip_source_choice)
+    else:
+        list_sources()
+        while True:
+            choice = input(f"\n请选择一个 Python Pip 源 (输入序号) 或 输入 'q' 退出: ").strip()
+            if choice == 'q':
+                print("程序已退出。")
+                break
+            elif choice in pip_sources:
+                switch_source(choice)
+                break
+            else:
+                print(f"无效的选择，请输入有效的序号。")
 
 if __name__ == "__main__":
     main()
