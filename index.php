@@ -1,22 +1,26 @@
 <?php
+// 定义文件名
+$windows_script_name = "switch_pip.windows.tcmd";
+$linux_mac_script_name = "switch_pip.unix.tcmd";
+
 // 定义文件路径
-$windows_script = "switch_pip.windows.tcmd";
-$linux_mac_script = "switch_pip.unix.tcmd";
+$scripts_storage_path = __DIR__."/";
 
 // 获取User-Agent字符串
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 
+
 // 检查User-Agent以区分操作系统
 if (strpos($user_agent, 'Windows') !== false) {
     // 如果是Windows操作系统，读取Windows脚本文件内容
-    $file_path = $windows_script;
+    $file_path = $scripts_storage_path.$windows_script_name;
     $content_type = 'application/octet-stream'; // 设置适当的Content-Type
-    $file_name = 'windows_switch_pip.cmd';
+    $file_name = $windows_script_name;
 } else {
     // 如果是Mac或Linux操作系统，读取Unix脚本文件内容
-    $file_path = $linux_mac_script;
+    $file_path = $scripts_storage_path.$linux_mac_script_name;
     $content_type = 'application/octet-stream'; // 设置适当的Content-Type
-    $file_name = 'unix_switch_pip.sh';
+    $file_name = $linux_mac_script_name;
 }
 
 // 检查文件是否存在
@@ -33,7 +37,7 @@ if (file_exists($file_path)) {
 } else {
     // 如果文件不存在，返回404错误
     header("HTTP/1.0 404 Not Found");
-    echo "文件未找到。";
+    echo "Package Configuration Error";
 }
 exit;
 ?>

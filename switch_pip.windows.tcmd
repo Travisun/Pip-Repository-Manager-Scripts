@@ -9,6 +9,13 @@ $OutputEncoding = [Console]::OutputEncoding
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 
+# 检查是否安装Python
+Write-Output "Checking for Python installation..."
+if (-Not (Get-Command python -ErrorAction SilentlyContinue)) {
+    Write-Output "Python is not installed. Exiting..."
+    exit 1
+}
+
 # 下载Python脚本
 Write-Output "Downloading Package..."
 Invoke-WebRequest -Uri $PYTHON_SCRIPT_URL -OutFile $TEMP_PY_SCRIPT
