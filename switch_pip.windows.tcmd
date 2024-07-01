@@ -1,0 +1,35 @@
+# 设置远程Python脚本的URL
+$PYTHON_SCRIPT_URL = "https://sh.evzs.com/prm/switch_pip.py"
+
+# 设置本地临时文件名
+$TEMP_PY_SCRIPT = "switch_pip_temp.py"
+
+# 设置控制台输出编码为UTF-8
+$OutputEncoding = [Console]::OutputEncoding
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
+
+# 下载Python脚本
+Write-Output "Downloading Package..."
+Invoke-WebRequest -Uri $PYTHON_SCRIPT_URL -OutFile $TEMP_PY_SCRIPT
+
+# 检查是否下载成功
+if (-Not (Test-Path $TEMP_PY_SCRIPT)) {
+    Write-Output "Download Failed, Please check your network."
+    exit 1
+}
+
+# 运行Python脚本
+Write-Output "Running Package..."
+python $TEMP_PY_SCRIPT
+
+# 删除临时Python脚本
+Write-Output "Remove Package..."
+Remove-Item $TEMP_PY_SCRIPT
+
+Write-Output "Done."
+
+# 恢复控制台输出编码
+[Console]::OutputEncoding = $OutputEncoding
+
+pause
