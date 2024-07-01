@@ -33,4 +33,4 @@ rm -f $TEMP_PY_SCRIPT
 echo "Done."
 
 # 暂停脚本，等待用户输入
-read -p "Press [Enter] key to continue..."
+# read -p "Press [Enter] key to continue..."

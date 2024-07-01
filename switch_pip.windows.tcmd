@@ -39,4 +39,4 @@ Write-Output "Done."
 # 恢复控制台输出编码
 [Console]::OutputEncoding = $OutputEncoding
 
-pause
+# pause
